@@ -70,7 +70,7 @@ class Radio:
                 filename = self.folder+self.current_song+'.mp3'
                 if self.save: f = open(filename, 'ab')
             except Exception:
-                self.read_stream(self)
+                self.read_stream()
             
     def set_metadata_handler(self, handler):
         self.metadata_handler = handler
