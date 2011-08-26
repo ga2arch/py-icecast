@@ -66,7 +66,7 @@ class Radio:
             
             filename = self.folder+self.current_song_name+'.mp3'
             if self.save: f = open(filename, 'ab')
-            
+            print self.current_song_name
             
     def set_id3tag_handler(self, handler):
         self.handler = handler
