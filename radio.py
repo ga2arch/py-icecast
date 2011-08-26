@@ -1,9 +1,7 @@
 import urllib2
 
-
 class Radio:
     def __init__(self, pls, folder, save):
-        Greenlet.__init__(self)
         self.pls = pls
         self.folder = folder
         self.save = save
@@ -41,7 +39,7 @@ class Radio:
         title = data.split('StreamTitle=\'')[1].split('\';')[0]
         return title
         
-    def _run(self):
+    def read_stream(self):
         self.__parse_pls()
         self.__init_stream()
         self.__parse_header()
