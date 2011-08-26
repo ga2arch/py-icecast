@@ -5,7 +5,9 @@ class Radio:
         self.pls = pls
         self.folder = folder
         self.save = save
-        self.handler = None
+        self.metadata_handler = None
+        self.title_handler = None
+        self.current_song = None
     
     def __parse_pls(self):
         pls = open(self.pls, 'r')
@@ -56,24 +58,32 @@ class Radio:
                 length = ord(self.stream.read(1)) * 16
                 if length == 0: continue
                 if f: f.close()
-                if f and self.handler: 
-                    try:
-                        self.handler(filename, name, self.header['genre'])
-                    except Exception:
-                        pass
+                if f and self.metadat_handler: 
+                    try:self.metadata_handler(filename, name, self.header['genre'])
+                    except:pass
                     
-                self.current_song_name = self.__parse_metadata(self.stream.read(length))
-                self.current_song_name.replace('/', '\/')
-            
-                filename = self.folder+self.current_song_name+'.mp3'
+                self.current_song = self.__parse_metadata(self.stream.read(length))
+                self.current_song.replace('/', '\/')
+                
+                if self.title_handler: self.title_handler(self.current_song)
+                
+                filename = self.folder+self.current_song+'.mp3'
                 if self.save: f = open(filename, 'ab')
-                print self.current_song_name
             except Exception:
                 self.read_stream(self)
             
-    def set_id3tag_handler(self, handler):
-        self.handler = handler
+    def set_metadata_handler(self, handler):
+        self.metadata_handler = handler
+    
+    def set_title_handler(self, handler):
+        self.title_handler = handler
+
 
 if __name__ == '__main__':
+    
+    def print_title(title):
+        print title
+    
     r = Radio('listen.pls', '', False)
+    r.set_title_handler(print_title)
     r.read_stream()
