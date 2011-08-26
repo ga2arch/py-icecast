@@ -8,17 +8,19 @@ class Radio:
         self.handler = None
     
     def __parse_pls(self):
-        lines = self.pls.readlines()
+        pls = open(self.pls, 'r')
+        lines = pls.readlines()
+        if not lines: raise Exception('Empty pls')
         self.servers = [line.split('=')[1].rstrip() for line in lines if line[0:4] == 'File']
         
     def __init_stream(self, i=0):
-        if i > len(self.servers): raise Exception('No valid server found')
+        if i == len(self.servers): raise Exception('No valid server or no connectivity')
         stream_url = self.servers[i]
         headers = {'Icy-MetaData':1}
         req = urllib2.Request(stream_url, None, headers)
         try:
             self.stream = urllib2.urlopen(req)
-        except Exception:
+        except urllib2.URLError:
             self.__init_stream(i+1)
             
     def __parse_header(self):
@@ -47,27 +49,31 @@ class Radio:
         f = None
         
         while True:
-            data = self.stream.read(int(self.header['metaint']))
-            if f: f.write(data)
+            try:
+                data = self.stream.read(int(self.header['metaint']))
+                if f: f.write(data)
             
-            length = ord(self.stream.read(1)) * 16
-            if length == 0: continue
-            if f: f.close()
-            if f and self.handler: 
-                try:
-                    self.handler(filename, name, self.header['genre'])
-                except Exception:
-                    pass
+                length = ord(self.stream.read(1)) * 16
+                if length == 0: continue
+                if f: f.close()
+                if f and self.handler: 
+                    try:
+                        self.handler(filename, name, self.header['genre'])
+                    except Exception:
+                        pass
                     
-            self.current_song_name = self.__parse_metadata(self.stream.read(length))
-            self.current_song_name.replace('/', '\/')
+                self.current_song_name = self.__parse_metadata(self.stream.read(length))
+                self.current_song_name.replace('/', '\/')
             
-            filename = self.folder+self.current_song_name+'.mp3'
-            if self.save: f = open(filename, 'ab')
-            print self.current_song_name
+                filename = self.folder+self.current_song_name+'.mp3'
+                if self.save: f = open(filename, 'ab')
+                print self.current_song_name
+            except Exception:
+                self.read_stream(self)
             
     def set_id3tag_handler(self, handler):
         self.handler = handler
 
 if __name__ == '__main__':
-    pass
+    r = Radio('listen.pls', '', False)
+    r.read_stream()
