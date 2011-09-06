@@ -41,7 +41,7 @@ class Radio:
         
     def __parse_metadata(self, data):
         title = data.split('StreamTitle=\'')[1].split('\';')[0]
-        return title
+        return title.replace('/', '\/')
         
     def read_stream(self):
         self.__parse_pls()
@@ -62,7 +62,6 @@ class Radio:
                     self.metadata_handler(filename, name, self.header['genre'])
                     
                 self.current_song = self.__parse_metadata(self.stream.read(length))
-                self.current_song.replace('/', '\/')
                 
                 if self.title_handler: self.title_handler(self.current_song)
                 
