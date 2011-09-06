@@ -58,9 +58,8 @@ class Radio:
                 length = ord(self.stream.read(1)) * 16
                 if length == 0: continue
                 if f: f.close()
-                if f and self.metadat_handler: 
-                    try:self.metadata_handler(filename, name, self.header['genre'])
-                    except:pass
+                if f and self.metadata_handler: 
+                    self.metadata_handler(filename, name, self.header['genre'])
                     
                 self.current_song = self.__parse_metadata(self.stream.read(length))
                 self.current_song.replace('/', '\/')
